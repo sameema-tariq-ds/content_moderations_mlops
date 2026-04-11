@@ -2,6 +2,7 @@
 
 import pytest
 from fastapi.testclient import TestClient
+
 from app.main import app
 
 
@@ -21,7 +22,9 @@ def test_health(client):
 
 def test_predict_spam(client):
     """POST /predict with spam text should return label spam and valid confidence."""
-    response = client.post("/predict", json={"text": "Congratulations! You won a free prize. Call now!"})
+    response = client.post(
+        "/predict", json={"text": "Congratulations! You won a free prize. Call now!"}
+    )
     assert response.status_code == 200
     assert response.json()["label"] == "spam"
     assert 0 < response.json()["confidence"] <= 1
@@ -38,3 +41,23 @@ def test_predict_empty_text(client):
     """POST /predict with empty string should return 422 validation error."""
     response = client.post("/predict", json={"text": ""})
     assert response.status_code == 422
+    body = response.json()
+    assert body["error"]["code"] == "validation_error"
+
+
+def test_predict_batch(client):
+    """POST /predict/batch returns predictions in the same order as inputs."""
+    response = client.post(
+        "/predict/batch",
+        json={
+            "texts": [
+                "Congratulations! You won a free prize. Call now!",
+                "Hello, see you at lunch.",
+            ]
+        },
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["count"] == 2
+    assert payload["predictions"][0]["label"] == "spam"
+    assert payload["predictions"][1]["label"] == "ham"

@@ -2,9 +2,11 @@
 
 import re
 import string
+
 import pandas as pd
-from config.settings import STOP_WORDS
+
 from app.logger import get_logger
+from config.settings import STOP_WORDS
 
 logger = get_logger(__name__)
 
@@ -34,9 +36,7 @@ class SMSPreprocessor:
         text = re.sub(r"[£$]\d+|\d+p\b", " pricetoken ", text)
 
         # 5. Remove punctuation
-        text = text.translate(
-            str.maketrans(string.punctuation, " " * len(string.punctuation))
-        )
+        text = text.translate(str.maketrans(string.punctuation, " " * len(string.punctuation)))
 
         # 6. Remove remaining standalone digits
         text = re.sub(r"\b\d+\b", " ", text)
@@ -45,10 +45,7 @@ class SMSPreprocessor:
         text = re.sub(r"\s+", " ", text).strip()
 
         # 8. Remove stopwords and single-character tokens
-        tokens = [
-            t for t in text.split()
-            if len(t) > 1 and t not in STOP_WORDS
-        ]
+        tokens = [t for t in text.split() if len(t) > 1 and t not in STOP_WORDS]
 
         return " ".join(tokens)
 
@@ -76,4 +73,3 @@ def load_preprocessed_data(df: pd.DataFrame) -> pd.DataFrame:
     preprocessor = SMSPreprocessor()
     df["text_clean"] = preprocessor.fit_transform(df["text"])
     return df
-

@@ -26,20 +26,21 @@ def model_predict(pipeline: Pipeline, X_test) -> list:
 def model_evaluate(y_test, y_pred) -> dict:
     """Compute and log accuracy, F1, precision, recall, and confusion matrix."""
     metrics = {
-        "accuracy":  round(accuracy_score(y_test, y_pred),  4),
-        "f1_spam":   round(f1_score(y_test, y_pred),        4),
+        "accuracy": round(accuracy_score(y_test, y_pred), 4),
+        "f1_spam": round(f1_score(y_test, y_pred), 4),
         "precision": round(precision_score(y_test, y_pred), 4),
-        "recall":    round(recall_score(y_test, y_pred),    4),
+        "recall": round(recall_score(y_test, y_pred), 4),
     }
 
-    logger.info(f"Accuracy: {metrics['accuracy']} | F1: {metrics['f1_spam']} | "
-                f"Precision: {metrics['precision']} | Recall: {metrics['recall']}")
+    logger.info(
+        f"Accuracy: {metrics['accuracy']} | F1: {metrics['f1_spam']} | "
+        f"Precision: {metrics['precision']} | Recall: {metrics['recall']}"
+    )
     logger.info(f"\n{classification_report(y_test, y_pred, target_names=['ham', 'spam'])}")
 
     cm = confusion_matrix(y_test, y_pred)
     logger.info(
-        f"Confusion Matrix — "
-        f"TN: {cm[0][0]}  FP: {cm[0][1]}  FN: {cm[1][0]}  TP: {cm[1][1]}"
+        f"Confusion Matrix — TN: {cm[0][0]}  FP: {cm[0][1]}  FN: {cm[1][0]}  TP: {cm[1][1]}"
     )
 
     return metrics
@@ -57,11 +58,13 @@ def log_to_mlflow(
     mlflow.set_experiment("spam-detection")
 
     with mlflow.start_run(run_name=f"tfidf-logreg-{model_version}") as run:
-        mlflow.log_params({
-            **{f"tfidf_{k}": str(v) for k, v in tfidf_params.items()},
-            **{f"lr_{k}":    str(v) for k, v in lr_params.items()},
-            "model_version": model_version,
-        })
+        mlflow.log_params(
+            {
+                **{f"tfidf_{k}": str(v) for k, v in tfidf_params.items()},
+                **{f"lr_{k}": str(v) for k, v in lr_params.items()},
+                "model_version": model_version,
+            }
+        )
         mlflow.log_metrics(metrics)
         mlflow.sklearn.log_model(pipeline, artifact_path="model")
 

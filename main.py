@@ -1,10 +1,10 @@
 """Entry point — runs the full pipeline: extract → preprocess → train → save."""
 
+from config.settings import INPUT_PATH, validate_paths
 from pipeline.extract import extract_to_csv
 from pipeline.preprocessing import load_preprocessed_data
-from pipeline.utils import summarize_sms_info, save_preprocessed_csv
 from pipeline.train import train
-from config.settings import INPUT_PATH, validate_paths
+from pipeline.utils import save_preprocessed_csv, summarize_sms_info
 
 
 def main():
@@ -19,4 +19,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

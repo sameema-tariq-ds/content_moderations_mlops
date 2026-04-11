@@ -1,0 +1,19 @@
+.git
+.github
+__pycache__/
+*.py[codz]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+.env
+
+# Local artifacts (keep runtime images clean)
+data/
+model/
+mlflow_artifacts/
+
+# Docs/dev-only
+*.ipynb

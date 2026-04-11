@@ -27,4 +27,4 @@ def extract_to_csv(zip_path: str | Path) -> pd.DataFrame:
 
     logger.info(f"Label distribution:\n{df['label'].value_counts().to_string()}")
 
-    return df   
+    return df

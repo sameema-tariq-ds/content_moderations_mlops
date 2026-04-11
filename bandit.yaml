@@ -1,0 +1,8 @@
+exclude_dirs:
+  - tests
+
+# This repo intentionally uses pickle for local model bundles.
+# Treat the model file as a trusted artifact (e.g., produced by this pipeline or fetched from a controlled store).
+skips:
+  - B301 # pickle
+  - B403 # import_pickle

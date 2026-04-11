@@ -3,15 +3,13 @@ services:
     build:
       context: .
       args:
-        INSTALL_DEV: "1"
+        INSTALL_DEV: "0"
     ports:
       - "8000:8000"
-    volumes:
-      - .:/app
     environment:
       - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=info
       - MLFLOW_TRACKING_URI=http://mlflow:5000
-      - GIT_PYTHON_REFRESH=quiet
     depends_on:
       - mlflow
 

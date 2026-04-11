@@ -9,10 +9,9 @@ from sklearn.model_selection import StratifiedKFold, cross_val_score, train_test
 from sklearn.pipeline import Pipeline
 
 from app.logger import get_logger
-from pipeline.test_evaluate import model_predict, model_evaluate, log_to_mlflow
-from pipeline.save_model import model_save
-
 from config.settings import LR_PARAMS, TFIDF_PARAMS
+from pipeline.save_model import model_save
+from pipeline.test_evaluate import log_to_mlflow, model_evaluate, model_predict
 
 logger = get_logger(__name__)
 
@@ -21,10 +20,12 @@ MODEL_VERSION = os.getenv("MODEL_VERSION", "v1")
 
 def build_pipeline() -> Pipeline:
     """Construct the TF-IDF + Logistic Regression sklearn pipeline."""
-    return Pipeline([
-        ("tfidf", TfidfVectorizer(**TFIDF_PARAMS)),
-        ("clf",   LogisticRegression(**LR_PARAMS)),
-    ])
+    return Pipeline(
+        [
+            ("tfidf", TfidfVectorizer(**TFIDF_PARAMS)),
+            ("clf", LogisticRegression(**LR_PARAMS)),
+        ]
+    )
 
 
 def cross_validate(pipeline: Pipeline, X: pd.Series, y: pd.Series) -> dict:
@@ -35,7 +36,7 @@ def cross_validate(pipeline: Pipeline, X: pd.Series, y: pd.Series) -> dict:
     logger.info(f"CV F1: {scores.mean():.4f} (+/- {scores.std():.4f})")
     return {
         "cv_f1_mean": round(scores.mean(), 4),
-        "cv_f1_std":  round(scores.std(),  4),
+        "cv_f1_std": round(scores.std(), 4),
     }
 
 
@@ -68,7 +69,7 @@ def train(df: pd.DataFrame) -> None:
         **metrics,
         **cv_metrics,
         "train_size": len(X_train),
-        "test_size":  len(X_test),
+        "test_size": len(X_test),
     }
 
     # Log to MLflow
