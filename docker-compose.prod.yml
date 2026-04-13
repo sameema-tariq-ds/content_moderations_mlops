@@ -6,6 +6,9 @@ services:
         INSTALL_DEV: "0"
     ports:
       - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./model:/app/model
     read_only: true
     tmpfs:
       - /tmp
@@ -20,9 +23,23 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - LOG_LEVEL=info
-      - REQUIRE_MODEL_SHA256=1
-      - TRUST_PROXY_HEADERS=1
-      - TRUSTED_PROXY_IPS=1.2.3.4
+      # Recommended:
+      # - REQUIRE_MODEL_SHA256=1
+      # Behind a reverse proxy/load balancer (set your proxy IPs):
+      # - TRUST_PROXY_HEADERS=1
+      # - TRUSTED_PROXY_IPS=127.0.0.1
 
       # In production, point this to a private/managed MLflow if you need tracking:
       # - MLFLOW_TRACKING_URI=http(s)://<internal-mlflow-host>:5000
+
+  trainer:
+    build:
+      context: .
+      args:
+        INSTALL_DEV: "0"
+    user: "0:0"
+    volumes:
+      - ./data:/app/data
+      - ./model:/app/model
+    environment:
+      - PYTHONUNBUFFERED=1

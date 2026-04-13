@@ -88,6 +88,12 @@ Production-like (no MLflow container, hardened runtime settings):
 docker compose -f docker-compose.prod.yml up --build
 ```
 
+Note: `docker-compose.prod.yml` mounts `./data` and `./model` so the container can read artifacts while the rest of the
+filesystem stays read-only. If you want to run training with the prod compose file, use the `trainer` service:
+```bash
+docker compose -f docker-compose.prod.yml run --rm trainer python main.py
+```
+
 Open the UI:
 - `http://localhost:8000/`
 
