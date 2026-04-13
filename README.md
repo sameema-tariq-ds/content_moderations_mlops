@@ -10,9 +10,10 @@ Classifies text as **spam** or **ham** using a TF-IDF + Logistic Regression mode
 
 ```mermaid
 flowchart LR
-  U[User] --> B[Browser/Client]
-  B -->|GET / (UI)| API[FastAPI API]
-  B -->|POST /predict<br/>POST /predict/batch| API
+  U[User] --> B[Browser]
+  U --> C[API Client]
+  B -->|GET /| API[FastAPI API]
+  C -->|POST /predict<br/>POST /predict/batch| API
   API --> P[Predictor]
   P --> M[(model/model.pkl)]
   T[Training pipeline<br/>python main.py] --> M
