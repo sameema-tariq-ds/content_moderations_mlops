@@ -10,8 +10,9 @@ Classifies text as **spam** or **ham** using a TF-IDF + Logistic Regression mode
 
 ```mermaid
 flowchart LR
-  U[User] --> B[Client]
-  B -->|POST /predict<br/>POST /predict/batch| API[FastAPI API]
+  U[User] --> B[Browser/Client]
+  B -->|GET / (UI)| API[FastAPI API]
+  B -->|POST /predict<br/>POST /predict/batch| API
   API --> P[Predictor]
   P --> M[(model/model.pkl)]
   T[Training pipeline<br/>python main.py] --> M
@@ -23,7 +24,7 @@ flowchart LR
 ```
 content-moderation-mlops/
 |-- app/                        # FastAPI application
-|   |-- main.py                 # /health, /ready, /predict
+|   |-- main.py                 # UI + /health, /ready, /predict
 |   |-- predictor.py            # Loads model bundle and serves predictions
 |   |-- schemas.py              # Pydantic request/response validation
 |   `-- logger.py               # Shared logger
@@ -40,6 +41,7 @@ content-moderation-mlops/
 |   `-- test_api.py             # API tests (pytest)
 |-- Dockerfile
 |-- docker-compose.yml
+|-- docker-compose.prod.yml
 |-- pyproject.toml
 `-- main.py                     # Runs the full pipeline
 ```
@@ -55,15 +57,41 @@ content-moderation-mlops/
 
 ## Quickstart (Docker)
 
+### 1) Put the dataset in `data/`
+
+- Download the “SMS Spam Collection” dataset and place it at:
+  - `data/sms+spam+collection.zip`
+
+### 2) Train the model (writes `model/model.pkl`)
+
+Option A (recommended): run training inside Docker
 ```bash
-git clone <repo-url>
-cd content-moderation-mlops
-
-# Place dataset in data/
-# sms+spam+collection.zip -> data/sms+spam+collection.zip
-
-./Scripts/run.sh
+docker compose run --rm api python main.py
 ```
+
+Option B: run training locally
+```bash
+python -m pip install -e .
+python main.py
+```
+
+### 3) Run the API + UI
+
+Development (includes an MLflow container):
+```bash
+docker compose up --build
+```
+
+Production-like (no MLflow container, hardened runtime settings):
+```bash
+docker compose -f docker-compose.prod.yml up --build
+```
+
+Open the UI:
+- `http://localhost:8000/`
+
+Open the API docs UI:
+- `http://localhost:8000/docs`
 
 ## Production notes (model artifact)
 
@@ -76,6 +104,22 @@ To update the model in production:
 
 Optional: set `MODEL_SHA256` to verify the model file before loading (the pipeline writes
 `model/model.pkl.sha256` when it trains).
+
+## Recommended environment variables
+
+### Require model checksum (recommended)
+
+This prevents accidentally running a different/corrupted model file.
+
+- `REQUIRE_MODEL_SHA256=1`
+- Ensure `model/model.pkl.sha256` exists next to `model/model.pkl` (training creates it)
+
+### Correct rate-limiting IPs behind a reverse proxy
+
+If you run behind Nginx / a load balancer, enable trusted proxy headers so rate limiting uses the real client IP:
+
+- `TRUST_PROXY_HEADERS=1`
+- `TRUSTED_PROXY_IPS=<comma-separated proxy IPs>`
 
 ## API endpoints
 
